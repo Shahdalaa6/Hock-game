@@ -14,8 +14,27 @@ const questions = [
 ];
 
 
+const socket = io();
+
 let currentQuestion = 0;
 let players = [];
+let currentPlayerName = "";
+
+// Listen for player list updates from server
+socket.on('updatePlayers', (updatedPlayers) => {
+    players = updatedPlayers;
+    updatePlayersList();
+});
+
+// Listen when other players answer
+socket.on('playerAnswered', (data) => {
+    console.log(`${data.playerName} answered question ${data.question}: ${data.answer}`);
+});
+
+// Listen when other players progress
+socket.on('playerProgressed', (data) => {
+    console.log(`${data.playerName} is on question ${data.questionIndex}`);
+});
 
 function showScreen(screenId) {
     document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
@@ -28,8 +47,9 @@ function startGame() {
 
     if (name === "") return;
 
-    players.push(name);
-    updatePlayersList();
+    currentPlayerName = name;
+    // Notify server that a player joined
+    socket.emit('playerJoin', name);
     showScreen("playersScreen");
 }
 
@@ -39,7 +59,7 @@ function updatePlayersList() {
 
     players.forEach(player => {
         const li = document.createElement("li");
-        li.innerText = player;
+        li.innerText = player.name;
         list.appendChild(li);
     });
 
@@ -82,10 +102,23 @@ function selectAnswer(answer) {
     } else {
         buttons[1].classList.add("selected");
     }
+
+    // Notify server of the answer
+    socket.emit('answerQuestion', {
+        playerName: currentPlayerName,
+        questionIndex: currentQuestion,
+        answer: answer
+    });
 }
 
 function nextQuestion() {
     currentQuestion++;
+
+    // Notify server of progress
+    socket.emit('nextQuestion', {
+        playerName: currentPlayerName,
+        questionIndex: currentQuestion
+    });
 
     if (currentQuestion < questions.length) {
         loadQuestion();
@@ -99,3 +132,4 @@ function nextQuestion() {
         document.getElementById("nextBtn").style.display = "none";
     }
 }
+

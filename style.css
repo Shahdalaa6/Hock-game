@@ -1,0 +1,97 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: system-ui, Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+.screen {
+    display: none;
+    width: 100%;
+    max-width: 400px;
+    padding: 30px;
+    text-align: center;
+}
+
+.screen.active {
+    display: block;
+}
+
+input {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    margin: 15px 0;
+    border-radius: 8px;
+    border: none;
+}
+
+button {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    background-color: #ffffff;
+    color: #333;
+    cursor: pointer;
+}
+
+#playersList {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+}
+
+#playersList li {
+    background: rgba(255,255,255,0.2);
+    padding: 10px;
+    margin: 6px 0;
+    border-radius: 6px;
+}
+
+#gameScreen {
+    background: white;
+    color: #333;
+    border-radius: 14px;
+}
+
+.choice {
+    width: 100%;
+    padding: 16px;
+    margin: 10px 0;
+    border-radius: 10px;
+    background-color: #f0f0f0;
+    cursor: pointer;
+}
+
+.choice.selected {
+    background-color: #667eea;
+    color: white;
+}
+
+#nextBtn {
+    margin-top: 15px;
+    background-color: #234bff;
+    color: white;
+}
+
+/* 📱 Mobile */
+@media (max-width: 600px) {
+    .screen {
+        padding: 20px;
+    }
+}
+button:disabled {
+    background-color: #ccc;
+    color: #666;
+    cursor: not-allowed;
+}

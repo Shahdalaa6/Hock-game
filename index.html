@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Questions</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- INTRO SCREEN -->
+<div class="screen active" id="introScreen">
+    <h1>Quick Questions</h1>
+    <p>Everyone is playing the same game</p>
+
+    <input type="text" id="playerName" placeholder="Enter your name">
+    <button onclick="startGame()">Start Game</button>
+</div>
+
+<!-- PLAYERS SCREEN -->
+<div class="screen" id="playersScreen">
+    <h2>Players currently playing</h2>
+    <ul id="playersList"></ul>
+    <button id="continueBtn" onclick="goToGame()" disabled>
+    Waiting for at least 3 players...
+</button>
+
+</div>
+
+<!-- GAME SCREEN -->
+<div class="screen" id="gameScreen">
+    <h2 id="question"></h2>
+
+    <div class="choices">
+        <button class="choice" onclick="selectAnswer(true)">True</button>
+        <button class="choice" onclick="selectAnswer(false)">False</button>
+    </div>
+
+    <button id="nextBtn" onclick="nextQuestion()">Next</button>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

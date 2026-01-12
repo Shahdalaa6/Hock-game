@@ -19,10 +19,10 @@ let currentPlayerName = "";
 
 /* ---------------- SCREENS ---------------- */
 
-// function showScreen(id) {
-//     document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-//     document.getElementById(id).classList.add("active");
-// }
+function showScreen(id) {
+    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+}
 
 /* ---------------- START ---------------- */
 
@@ -46,37 +46,32 @@ function loadQuestion() {
     document.getElementById("question").innerText =
         questions[currentQuestion].text;
 
-    document.getElementById("feedback").innerText = "";
+    const buttons = document.querySelectorAll(".choice");
+    buttons[0].innerText = "True";
+    buttons[1].innerText = "False";
 
-    document.querySelectorAll(".choice").forEach(btn => {
-        btn.classList.remove("correct", "wrong");
-        btn.disabled = false;
-        btn.style.display = "block";
+    buttons.forEach(btn => {
+        btn.classList.remove("correct", "wrong", "selected"); // ✅ clear old styles
+        btn.disabled = false;                                 // ✅ re-enable
+        btn.style.display = "block";                          // ✅ make visible
     });
 
     document.getElementById("nextBtn").style.display = "none";
 }
 
+
+
 /* ---------------- ANSWER ---------------- */
 
 function selectAnswer(answer) {
-    const correct = questions[currentQuestion].correct;
     const buttons = document.querySelectorAll(".choice");
 
-    buttons.forEach(btn => btn.disabled = true);
-
-    if (answer === correct) {
-        score++;
-        answer ? buttons[0].classList.add("correct") : buttons[1].classList.add("correct");
-        document.getElementById("feedback").innerText = "Correct ✅";
-    } else {
-        answer ? buttons[0].classList.add("wrong") : buttons[1].classList.add("wrong");
-        correct ? buttons[0].classList.add("correct") : buttons[1].classList.add("correct");
-        document.getElementById("feedback").innerText = "Wrong ❌";
-    }
+    buttons.forEach(btn => btn.classList.remove("selected"));
+    answer ? buttons[0].classList.add("selected") : buttons[1].classList.add("selected");
 
     document.getElementById("nextBtn").style.display = "block";
 }
+
 
 /* ---------------- NEXT ---------------- */
 
@@ -100,9 +95,10 @@ function endGame() {
         `${currentPlayerName}, your score: ${score} / ${questions.length}`;
 
     document.querySelectorAll(".choice").forEach(btn => btn.style.display = "none");
-    document.getElementById("nextBtn").style.display = "none";
+    document.getElementById("nextBtn").style.display = "none"; // ✅ fixed
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     showScreen("introScreen");
+    document.getElementById("startBtn").addEventListener("click", startGame); // ✅ added
 });

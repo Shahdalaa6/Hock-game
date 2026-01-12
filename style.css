@@ -44,6 +44,15 @@ button {
     color: #333;
     cursor: pointer;
 }
+.choice.correct {
+  background-color: green;
+  color: white;
+}
+
+.choice.wrong {
+  background-color: red;
+  color: white;
+}
 
 #playersList {
     list-style: none;

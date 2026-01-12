@@ -142,3 +142,6 @@ function endGame() {
     document.querySelectorAll(".choice").forEach(btn => btn.style.display = "none");
     document.getElementById("nextBtn").style.display = "none";
 }
+document.addEventListener("DOMContentLoaded", () => {
+    showScreen("introScreen");
+});

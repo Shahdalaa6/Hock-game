@@ -91,11 +91,6 @@ function endGame() {
     document.getElementById("question").innerText =
         `Game completed 🎉`;
 
-    document.getElementById("feedback").innerText =
-        `${currentPlayerName}, your score: ${score} / ${questions.length}`;
-
-    document.querySelectorAll(".choice").forEach(btn => btn.style.display = "none");
-    document.getElementById("nextBtn").style.display = "none"; // ✅ fixed
 }
 
 document.addEventListener("DOMContentLoaded", () => {

@@ -13,43 +13,46 @@ const questions = [
     { text: "A day on Venus is longer than a year on Venus.", correct: true }
 ];
 
-
 const socket = io();
 
 let currentQuestion = 0;
 let players = [];
 let currentPlayerName = "";
 
-// Listen for player list updates from server
-socket.on('updatePlayers', (updatedPlayers) => {
+/* ---------------- SOCKET LISTENERS ---------------- */
+
+socket.on("updatePlayers", (updatedPlayers) => {
     players = updatedPlayers;
     updatePlayersList();
 });
 
-// Listen when other players answer
-socket.on('playerAnswered', (data) => {
-    console.log(`${data.playerName} answered question ${data.question}: ${data.answer}`);
+socket.on("playerAnswered", (data) => {
+    console.log(`${data.playerName} answered Q${data.questionIndex}`);
 });
 
-// Listen when other players progress
-socket.on('playerProgressed', (data) => {
-    console.log(`${data.playerName} is on question ${data.questionIndex}`);
+socket.on("playerProgressed", (data) => {
+    console.log(`${data.playerName} moved to Q${data.questionIndex}`);
 });
 
-function showScreen(screenId) {
+/* ---------------- UI FUNCTIONS ---------------- */
+
+function showScreen(id) {
     document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-    document.getElementById(screenId).classList.add("active");
+    document.getElementById(id).classList.add("active");
 }
 
-function startGame() {
-    const nameInput = document.getElementById("playerName");
-    const name = nameInput.value.trim();
+/* ---------------- JOIN GAME ---------------- */
 
-    if (name === "") return;
+function startGame() {
+    const input = document.getElementById("playerName");
+    const name = input.value.trim();
+
+    if (!name) return;
 
     currentPlayerName = name;
-    // Notify server that a player joined
-    socket.emit('playerJoin', name);
+    socket.emit("playerJoin", name);
+
+    input.value = "";
     showScreen("playersScreen");
 }
 
@@ -62,18 +65,9 @@ function updatePlayersList() {
         li.innerText = player.name;
         list.appendChild(li);
     });
-
-    const continueBtn = document.getElementById("continueBtn");
-
-    if (players.length >= 3) {
-        continueBtn.disabled = false;
-        continueBtn.innerText = "Start Game";
-    } else {
-        continueBtn.disabled = true;
-        continueBtn.innerText = "Waiting for at least 3 players...";
-    }
 }
 
+/* ---------------- GAME LOGIC ---------------- */
 
 function goToGame() {
     currentQuestion = 0;
@@ -85,37 +79,50 @@ function loadQuestion() {
     document.getElementById("question").innerText =
         questions[currentQuestion].text;
 
+    document.getElementById("feedback").innerText = "";
+
     document.querySelectorAll(".choice").forEach(btn => {
-        btn.classList.remove("selected");
+        btn.classList.remove("correct", "wrong");
+        btn.disabled = false;
         btn.style.display = "block";
     });
 
+    // ❗ Hide Next until answer chosen
+    document.getElementById("nextBtn").style.display = "none";
+}
+
+/* ---------------- ANSWERING ---------------- */
+
+function selectAnswer(answer) {
+    const correct = questions[currentQuestion].correct;
+    const buttons = document.querySelectorAll(".choice");
+
+
+    if (answer === correct) {
+        answer ? buttons[0].classList.add("correct") : buttons[1].classList.add("correct");
+        document.getElementById("feedback").innerText = "Correct!";
+    } else {
+        answer ? buttons[0].classList.add("wrong") : buttons[1].classList.add("wrong");
+        correct ? buttons[0].classList.add("correct") : buttons[1].classList.add("correct");
+        document.getElementById("feedback").innerText = "Wrong!";
+    }
+
+    socket.emit("answerQuestion", {
+        playerName: currentPlayerName,
+        questionIndex: currentQuestion,
+        answer
+    });
+
+    // ✅ Show Next button ONLY after answering
     document.getElementById("nextBtn").style.display = "block";
 }
 
-function selectAnswer(answer) {
-    const buttons = document.querySelectorAll(".choice");
-    buttons.forEach(btn => btn.classList.remove("selected"));
-
-    if (answer) {
-        buttons[0].classList.add("selected");
-    } else {
-        buttons[1].classList.add("selected");
-    }
-
-    // Notify server of the answer
-    socket.emit('answerQuestion', {
-        playerName: currentPlayerName,
-        questionIndex: currentQuestion,
-        answer: answer
-    });
-}
+/* ---------------- NEXT QUESTION ---------------- */
 
 function nextQuestion() {
     currentQuestion++;
 
-    // Notify server of progress
-    socket.emit('nextQuestion', {
+    socket.emit("nextQuestion", {
         playerName: currentPlayerName,
         questionIndex: currentQuestion
     });
@@ -123,13 +130,15 @@ function nextQuestion() {
     if (currentQuestion < questions.length) {
         loadQuestion();
     } else {
-        document.getElementById("question").innerText = "Game completed.";
-
-        document.querySelectorAll(".choice").forEach(btn => {
-            btn.style.display = "none";
-        });
-
-        document.getElementById("nextBtn").style.display = "none";
+        endGame();
     }
 }
 
+/* ---------------- END GAME ---------------- */
+
+function endGame() {
+    document.getElementById("question").innerText = "Game completed 🎉";
+
+    document.querySelectorAll(".choice").forEach(btn => btn.style.display = "none");
+    document.getElementById("nextBtn").style.display = "none";
+}

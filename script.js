@@ -87,13 +87,18 @@ function nextQuestion() {
 
 /* ---------------- END ---------------- */
 
+/* ---------------- END ---------------- */
 function endGame() {
     document.getElementById("question").innerText =
         `Game completed 🎉`;
 
+    // Hide the choice buttons
+    const buttons = document.querySelectorAll(".choice");
+    buttons.forEach(btn => {
+        btn.style.display = "none";
+    });
+
+    // Hide the next button
+    document.getElementById("nextBtn").style.display = "none";
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    showScreen("introScreen");
-    document.getElementById("startBtn").addEventListener("click", startGame); // ✅ added
-});

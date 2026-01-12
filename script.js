@@ -13,35 +13,18 @@ const questions = [
     { text: "A day on Venus is longer than a year on Venus.", correct: true }
 ];
 
-const socket = io();
-
 let currentQuestion = 0;
-let players = [];
+let score = 0;
 let currentPlayerName = "";
 
-/* ---------------- SOCKET LISTENERS ---------------- */
-
-socket.on("updatePlayers", (updatedPlayers) => {
-    players = updatedPlayers;
-    updatePlayersList();
-});
-
-socket.on("playerAnswered", (data) => {
-    console.log(`${data.playerName} answered Q${data.questionIndex}`);
-});
-
-socket.on("playerProgressed", (data) => {
-    console.log(`${data.playerName} moved to Q${data.questionIndex}`);
-});
-
-/* ---------------- UI FUNCTIONS ---------------- */
+/* ---------------- SCREENS ---------------- */
 
 function showScreen(id) {
     document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
     document.getElementById(id).classList.add("active");
 }
 
-/* ---------------- JOIN GAME ---------------- */
+/* ---------------- START ---------------- */
 
 function startGame() {
     const input = document.getElementById("playerName");
@@ -50,30 +33,14 @@ function startGame() {
     if (!name) return;
 
     currentPlayerName = name;
-    socket.emit("playerJoin", name);
-
-    input.value = "";
-    showScreen("playersScreen");
-}
-
-function updatePlayersList() {
-    const list = document.getElementById("playersList");
-    list.innerHTML = "";
-
-    players.forEach(player => {
-        const li = document.createElement("li");
-        li.innerText = player.name;
-        list.appendChild(li);
-    });
-}
-
-/* ---------------- GAME LOGIC ---------------- */
-
-function goToGame() {
+    score = 0;
     currentQuestion = 0;
-    loadQuestion();
+
     showScreen("gameScreen");
+    loadQuestion();
 }
+
+/* ---------------- QUESTIONS ---------------- */
 
 function loadQuestion() {
     document.getElementById("question").innerText =
@@ -87,45 +54,34 @@ function loadQuestion() {
         btn.style.display = "block";
     });
 
-    // ❗ Hide Next until answer chosen
     document.getElementById("nextBtn").style.display = "none";
 }
 
-/* ---------------- ANSWERING ---------------- */
+/* ---------------- ANSWER ---------------- */
 
 function selectAnswer(answer) {
     const correct = questions[currentQuestion].correct;
     const buttons = document.querySelectorAll(".choice");
 
+    buttons.forEach(btn => btn.disabled = true);
 
     if (answer === correct) {
+        score++;
         answer ? buttons[0].classList.add("correct") : buttons[1].classList.add("correct");
-        document.getElementById("feedback").innerText = "Correct!";
+        document.getElementById("feedback").innerText = "Correct ✅";
     } else {
         answer ? buttons[0].classList.add("wrong") : buttons[1].classList.add("wrong");
         correct ? buttons[0].classList.add("correct") : buttons[1].classList.add("correct");
-        document.getElementById("feedback").innerText = "Wrong!";
+        document.getElementById("feedback").innerText = "Wrong ❌";
     }
 
-    socket.emit("answerQuestion", {
-        playerName: currentPlayerName,
-        questionIndex: currentQuestion,
-        answer
-    });
-
-    // ✅ Show Next button ONLY after answering
     document.getElementById("nextBtn").style.display = "block";
 }
 
-/* ---------------- NEXT QUESTION ---------------- */
+/* ---------------- NEXT ---------------- */
 
 function nextQuestion() {
     currentQuestion++;
-
-    socket.emit("nextQuestion", {
-        playerName: currentPlayerName,
-        questionIndex: currentQuestion
-    });
 
     if (currentQuestion < questions.length) {
         loadQuestion();
@@ -134,14 +90,19 @@ function nextQuestion() {
     }
 }
 
-/* ---------------- END GAME ---------------- */
+/* ---------------- END ---------------- */
 
 function endGame() {
-    document.getElementById("question").innerText = "Game completed 🎉";
+    document.getElementById("question").innerText =
+        `Game completed 🎉`;
+
+    document.getElementById("feedback").innerText =
+        `${currentPlayerName}, your score: ${score} / ${questions.length}`;
 
     document.querySelectorAll(".choice").forEach(btn => btn.style.display = "none");
     document.getElementById("nextBtn").style.display = "none";
 }
+
 document.addEventListener("DOMContentLoaded", () => {
     showScreen("introScreen");
 });

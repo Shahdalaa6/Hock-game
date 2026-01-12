@@ -83,13 +83,13 @@ button {
 }
 
 .choice.selected {
-    background-color: #66ea71;
+    background-color: #62c8ff;
     color: white;
 }
 
 #nextBtn {
     margin-top: 15px;
-    background-color: #234bff;
+    background-color: #b3c1ff;
     color: white;
 }
 
